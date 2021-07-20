@@ -28,6 +28,7 @@ class MyApp extends StatelessWidget {
         GetPage(
           name: '/meeting',
           page: () => MeetingsPage(),
+          binding: MeetingBinding(),
         )
       ],
     );

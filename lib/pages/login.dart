@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_ion/flutter_ion.dart';
 import 'package:flutter_voice_call/controllers/ion_controller.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -37,8 +36,8 @@ class LoginController extends GetxController {
     prefs.setString('room', _sid.value);
     // _helper.editUrl(_server.value, _sid.value);
 
-    // _helper.signal.connect();
-    Get.to('/meeting');
+    _helper.connect(_server);
+    Get.toNamed('/meeting');
     return true;
   }
 }
