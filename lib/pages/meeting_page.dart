@@ -18,14 +18,15 @@ class VideoRendererAdapter {
   bool local;
   RTCVideoRenderer? renderer;
   MediaStream stream;
-  RTCVideoViewObjectFit _objectFit =
-      RTCVideoViewObjectFit.RTCVideoViewObjectFitCover;
+  // RTCVideoViewObjectFit _objectFit =
+  //     RTCVideoViewObjectFit.RTCVideoViewObjectFitCover;
   VideoRendererAdapter._internal(this.mid, this.stream, this.local);
 
   static Future<VideoRendererAdapter> create(
       String mid, MediaStream stream, bool local) async {
-    var renderer = VideoRendererAdapter._internal(mid, stream, local);
-    // await renderer.setupSrcObject();
+    VideoRendererAdapter renderer =
+        VideoRendererAdapter._internal(mid, stream, local);
+    await renderer.setupSrcObject();
     return renderer;
   }
 
@@ -36,7 +37,7 @@ class VideoRendererAdapter {
     }
     renderer?.srcObject = stream;
     if (local) {
-      _objectFit = RTCVideoViewObjectFit.RTCVideoViewObjectFitCover;
+      // _objectFit = RTCVideoViewObjectFit.RTCVideoViewObjectFitCover;
     }
   }
 
@@ -91,12 +92,78 @@ class MeetingController extends GetxController {
             video: false,
           ));
           ion?.sfu!.publish(_localStream!);
-          // _addAdapter(await VideoRenderer) {}
+          _addAdapter(await VideoRendererAdapter.create(
+              _localStream!.stream.id, _localStream!.stream, true));
         } catch (e) {
           print(e);
         }
       }
     };
+
+    ion?.onLeave = (String reason) {
+      print('reason: $reason');
+    };
+
+    ion?.onPeerEvent = (PeerEvent peerEvent) {
+      String name = peerEvent.peer.info['name'];
+      String state = '';
+      switch (peerEvent.state) {
+        case PeerState.NONE:
+          break;
+        case PeerState.JOIN:
+          state = 'join';
+          break;
+        case PeerState.UPDATE:
+          state = 'update';
+          break;
+        case PeerState.LEAVE:
+          state = 'leave';
+          break;
+      }
+      print('Peer:: [${peerEvent.peer.uid}:$name] $state::');
+    };
+
+    ion?.onStreamEvent = (StreamEvent streamEvent) async {
+      switch (streamEvent.state) {
+        case StreamState.NONE:
+          break;
+        case StreamState.ADD:
+          if (streamEvent.streams.isNotEmpty) {
+            String mid = streamEvent.streams[0].id;
+            print('::::StreamAdd : [$mid]');
+          }
+          break;
+        case StreamState.REMOVE:
+          if (streamEvent.streams.isNotEmpty) {
+            String mid = streamEvent.streams[0].id;
+            print(':::Stream remove : [$mid]');
+            _removeAdapter(mid);
+          }
+          break;
+      }
+    };
+
+    ion?.onTrack = (MediaStreamTrack track, RemoteStream stream) async {
+      print('track kind: ${track.kind}, onTrack is run');
+      if (track.kind == 'audio') {
+        _addAdapter(
+            await VideoRendererAdapter.create(stream.id, stream.stream, false));
+      }
+    };
+
+    name.value = prefs.getString('display_name') ?? 'guest';
+    room.value = prefs.getString('room') ?? 'room1';
+    _helper.join(room.value, name.value);
+  }
+
+  _removeAdapter(String mid) {
+    videoRenderers.value.removeWhere((element) => element.mid == mid);
+    videoRenderers.update((val) {});
+  }
+
+  _addAdapter(VideoRendererAdapter adapter) {
+    videoRenderers.value.add(adapter);
+    videoRenderers.update((val) {});
   }
 
   _switchSpeaker() {
@@ -110,12 +177,16 @@ class MeetingController extends GetxController {
 
   //Open or close audio
   _turnMicrophone() {
-    if (_localStr != null && _localStr!.stream.getAudioTracks().length > 0) {
+    print('turn mic was pressed');
+    print('${_localStr == null}');
+    if (_localStr != null && _localStr!.stream.getAudioTracks().length >= 0) {
       var muted = !_microphoneOff.value;
       _microphoneOff.value = muted;
+      print('microphoneOff value: ${_microphoneOff.value.toString()}');
       _localStr?.stream.getAudioTracks()[0].enabled = !muted;
       print('::The microphone is ${muted ? 'muted' : 'unmuted'}::');
     }
+    print('is above function run');
   }
 
   VideoRendererAdapter? get _localStr {
@@ -188,9 +259,9 @@ class MeetingsPage extends GetView<MeetingController> {
   IonConnector? get ion => controller.ion;
   List<VideoRendererAdapter> get remoteStream => controller._remoteStream;
 
-  _buildMajorStream() {}
-  _buildLocalStream() {}
-  _buildStreamList() {}
+  // _buildMajorStream() {}
+  // _buildLocalStream() {}
+  // _buildStreamList() {}
   _buildLoading() {
     return Center(
       child: Row(
