@@ -31,7 +31,7 @@ class IonController extends GetxController {
 
   connect(host) async {
     if (_ion == null) {
-      var url = 'http://$host:5551';
+      var url = 'http://$host';
       _ion = IonConnector(url: url);
     }
   }

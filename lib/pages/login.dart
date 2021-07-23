@@ -23,7 +23,7 @@ class LoginController extends GetxController {
   @mustCallSuper
   void onInit() async {
     prefs = await SharedPreferences.getInstance();
-    _server.value = prefs.getString('server') ?? '127.0.0.1';
+    _server.value = prefs.getString('server') ?? '34.133.211.147:5551';
     _sid.value = prefs.getString('room') ?? 'test room';
     super.onInit();
   }
@@ -32,6 +32,8 @@ class LoginController extends GetxController {
     if (_server.value.length == 0 || _sid.value.length == 0) {
       return false;
     }
+    print('Someone joined');
+    print('host on 34.133.211.147:5551');
     prefs.setString('server', _server.value);
     prefs.setString('room', _sid.value);
     // _helper.editUrl(_server.value, _sid.value);
