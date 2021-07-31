@@ -1,25 +1,24 @@
-import 'package:get/state_manager.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_ion/flutter_ion.dart';
 import 'package:uuid/uuid.dart';
+import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class IonController extends GetxController {
   SharedPreferences? _prefs;
-  String? _sid;
-  String? _name;
   IonConnector? _ion;
+  late String _sid;
+  late String _name;
   final String _uid = Uuid().v4();
-  var signal;
   IonConnector? get ion => _ion;
-  String? get sid => _sid;
+  String get sid => _sid;
   String get uid => _uid;
-  String? get name => _name;
+  String get name => _name;
   Client? get sfu => _ion?.sfu;
 
   @override
-  void onInit() {
-    print('onInit method');
+  void onInit() async {
     super.onInit();
+    print('IonController::onInit');
   }
 
   Future<SharedPreferences> prefs() async {
@@ -31,19 +30,19 @@ class IonController extends GetxController {
 
   connect(host) async {
     if (_ion == null) {
-      var url = 'http://$host';
-      _ion = IonConnector(url: url);
+      var url = 'http://$host:5551';
+      _ion = new IonConnector(url: url);
     }
   }
 
   join(String sid, String displayName) async {
     _sid = sid;
     _name = displayName;
-    _ion?.join(sid: sid, uid: uid, info: {'name': displayName});
+    _ion?.join(sid: _sid, uid: _uid, info: {'name': '$displayName'});
   }
 
   close() async {
-    _ion?.leave(uid);
+    _ion?.leave(_uid);
     _ion?.close();
     _ion = null;
   }

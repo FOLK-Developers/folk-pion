@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_voice_call/controllers/ion_controller.dart';
-import 'package:flutter_voice_call/pages/login.dart';
-import 'package:flutter_voice_call/pages/meeting_page.dart';
 import 'package:get/get.dart';
+
+import 'controllers/ion_controller.dart';
+import './utils/utils.dart';
+import './routes/app_pages.dart';
+import 'pages/not_found/not_found_view.dart';
+import './utils/logger_utils.dart';
 
 void main() {
   Get.put(IonController(), permanent: true);
@@ -13,40 +16,17 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'Pion/ion P2P audio calling',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(title: 'Pion/ion one to many broadcast'),
-      initialRoute: '/login',
-      getPages: [
-        GetPage(
-          name: '/login',
-          page: () => LoginView(),
-          binding: LoginBindings(),
-        ),
-        GetPage(
-          name: '/meeting',
-          page: () => MeetingsPage(),
-          binding: MeetingBinding(),
-        )
-      ],
+      debugShowCheckedModeBanner: true,
+      unknownRoute: GetPage(name: 'not-found', page: () => NotFound()),
+      enableLog: true,
+      theme: mDefaultTheme,
+      logWriterCallback: Logger.write,
+      initialRoute: AppPages.init,
+      getPages: AppPages.routes,
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  final String title;
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold();
-  }
-}
+final ThemeData mDefaultTheme = ThemeData(
+  primaryColor: string2Color('#0a0a0a'),
+);
