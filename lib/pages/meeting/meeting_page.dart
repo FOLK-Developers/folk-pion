@@ -181,6 +181,7 @@ class MeetingController extends GetxController {
   _swapAdapter(adapter) {
     var index = videoRenderers.value
         .indexWhere((element) => element.mid == adapter.mid);
+
     if (index != -1) {
       var temp = videoRenderers.value.elementAt(index);
       videoRenderers.value[0] = videoRenderers.value[index];
